@@ -8,107 +8,121 @@
 </head>
 <body onload="setPlayers()">
     <h1>Chess Game</h1>
-    <button>Start the Game</button>
-    <div>
-        <div class="row">
-            <p>8</p>
-            <div class="col white" data-cl="8a"></div>
-            <div class="col black" data-cl="8b"></div>
-            <div class="col white" data-cl="8c"></div>
-            <div class="col black" data-cl="8d"></div>
-            <div class="col white" data-cl="8e"></div>
-            <div class="col black" data-cl="8f"></div>
-            <div class="col white" data-cl="8g"></div>
-            <div class="col black" data-cl="8h"></div>
+    <button onclick="startGame()">Start the Game</button>
+    <div class="container">
+        <div class="score">
+            <h4>Whites</h4>
+            <div id="W">
+            </div>
         </div>
-        <div class="row">
-            <p>7</p>
-            <div class="col black" data-cl="7a"></div>
-            <div class="col white" data-cl="7b"></div>
-            <div class="col black" data-cl="7c"></div>
-            <div class="col white" data-cl="7d"></div>
-            <div class="col black" data-cl="7e"></div>
-            <div class="col white" data-cl="7f"></div>
-            <div class="col black" data-cl="7g"></div>
-            <div class="col white" data-cl="7h"></div>
+        <div class="board">
+            <div class="row">
+                <p>8</p>
+                <div class="col white" data-cl="8a"></div>
+                <div class="col black" data-cl="8b"></div>
+                <div class="col white" data-cl="8c"></div>
+                <div class="col black" data-cl="8d"></div>
+                <div class="col white" data-cl="8e"></div>
+                <div class="col black" data-cl="8f"></div>
+                <div class="col white" data-cl="8g"></div>
+                <div class="col black" data-cl="8h"></div>
+            </div>
+            <div class="row">
+                <p>7</p>
+                <div class="col black" data-cl="7a"></div>
+                <div class="col white" data-cl="7b"></div>
+                <div class="col black" data-cl="7c"></div>
+                <div class="col white" data-cl="7d"></div>
+                <div class="col black" data-cl="7e"></div>
+                <div class="col white" data-cl="7f"></div>
+                <div class="col black" data-cl="7g"></div>
+                <div class="col white" data-cl="7h"></div>
+            </div>
+            <div class="row">
+                <p>6</p>
+                <div class="col white" data-cl="6a"></div>
+                <div class="col black" data-cl="6b"></div>
+                <div class="col white" data-cl="6c"></div>
+                <div class="col black" data-cl="6d"></div>
+                <div class="col white" data-cl="6e"></div>
+                <div class="col black" data-cl="6f"></div>
+                <div class="col white" data-cl="6g"></div>
+                <div class="col black" data-cl="6h"></div>
+            </div>
+            <div class="row">
+                <p>5</p>
+                <div class="col black" data-cl="5a"></div>
+                <div class="col white" data-cl="5b"></div>
+                <div class="col black" data-cl="5c"></div>
+                <div class="col white" data-cl="5d"></div>
+                <div class="col black" data-cl="5e"></div>
+                <div class="col white" data-cl="5f"></div>
+                <div class="col black" data-cl="5g"></div>
+                <div class="col white" data-cl="5h"></div>
+            </div>
+            <div class="row">
+                <p>4</p>
+                <div class="col white" data-cl="4a"></div>
+                <div class="col black" data-cl="4b"></div>
+                <div class="col white" data-cl="4c"></div>
+                <div class="col black" data-cl="4d"></div>
+                <div class="col white" data-cl="4e"></div>
+                <div class="col black" data-cl="4f"></div>
+                <div class="col white" data-cl="4g"></div>
+                <div class="col black" data-cl="4h"></div>
+            </div>
+            <div class="row">
+                <p>3</p>
+                <div class="col black" data-cl="3a"></div>
+                <div class="col white" data-cl="3b"></div>
+                <div class="col black" data-cl="3c"></div>
+                <div class="col white" data-cl="3d"></div>
+                <div class="col black" data-cl="3e"></div>
+                <div class="col white" data-cl="3f"></div>
+                <div class="col black" data-cl="3g"></div>
+                <div class="col white" data-cl="3h"></div>
+            </div>
+            <div class="row">
+                <p>2</p>
+                <div class="col white" data-cl="2a"></div>
+                <div class="col black" data-cl="2b"></div>
+                <div class="col white" data-cl="2c"></div>
+                <div class="col black" data-cl="2d"></div>
+                <div class="col white" data-cl="2e"></div>
+                <div class="col black" data-cl="2f"></div>
+                <div class="col white" data-cl="2g"></div>
+                <div class="col black" data-cl="2h"></div>
+            </div>
+            <div class="row">
+                <p>1</p>
+                <div class="col black" data-cl="1a"></div>
+                <div class="col white" data-cl="1b"></div>
+                <div class="col black" data-cl="1c"></div>
+                <div class="col white" data-cl="1d"></div>
+                <div class="col black" data-cl="1e"></div>
+                <div class="col white" data-cl="1f"></div>
+                <div class="col black" data-cl="1g"></div>
+                <div class="col white" data-cl="1h"></div>
+            </div>
+            <div class="row__le">
+                <p>a</p>
+                <p>b</p>
+                <p>c</p>
+                <p>d</p>
+                <p>e</p>
+                <p>f</p>
+                <p>g</p>
+                <p>h</p>
+            </div>
         </div>
-        <div class="row">
-            <p>6</p>
-            <div class="col white" data-cl="6a"></div>
-            <div class="col black" data-cl="6b"></div>
-            <div class="col white" data-cl="6c"></div>
-            <div class="col black" data-cl="6d"></div>
-            <div class="col white" data-cl="6e"></div>
-            <div class="col black" data-cl="6f"></div>
-            <div class="col white" data-cl="6g"></div>
-            <div class="col black" data-cl="6h"></div>
-        </div>
-        <div class="row">
-            <p>5</p>
-            <div class="col black" data-cl="5a"></div>
-            <div class="col white" data-cl="5b"></div>
-            <div class="col black" data-cl="5c"></div>
-            <div class="col white" data-cl="5d"></div>
-            <div class="col black" data-cl="5e"></div>
-            <div class="col white" data-cl="5f"></div>
-            <div class="col black" data-cl="5g"></div>
-            <div class="col white" data-cl="5h"></div>
-        </div>
-        <div class="row">
-            <p>4</p>
-            <div class="col white" data-cl="4a"></div>
-            <div class="col black" data-cl="4b"></div>
-            <div class="col white" data-cl="4c"></div>
-            <div class="col black" data-cl="4d"></div>
-            <div class="col white" data-cl="4e"></div>
-            <div class="col black" data-cl="4f"></div>
-            <div class="col white" data-cl="4g"></div>
-            <div class="col black" data-cl="4h"></div>
-        </div>
-        <div class="row">
-            <p>3</p>
-            <div class="col black" data-cl="3a"></div>
-            <div class="col white" data-cl="3b"></div>
-            <div class="col black" data-cl="3c"></div>
-            <div class="col white" data-cl="3d"></div>
-            <div class="col black" data-cl="3e"></div>
-            <div class="col white" data-cl="3f"></div>
-            <div class="col black" data-cl="3g"></div>
-            <div class="col white" data-cl="3h"></div>
-        </div>
-        <div class="row">
-            <p>2</p>
-            <div class="col white" data-cl="2a"></div>
-            <div class="col black" data-cl="2b"></div>
-            <div class="col white" data-cl="2c"></div>
-            <div class="col black" data-cl="2d"></div>
-            <div class="col white" data-cl="2e"></div>
-            <div class="col black" data-cl="2f"></div>
-            <div class="col white" data-cl="2g"></div>
-            <div class="col black" data-cl="2h"></div>
-        </div>
-        <div class="row">
-            <p>1</p>
-            <div class="col black" data-cl="1a"></div>
-            <div class="col white" data-cl="1b"></div>
-            <div class="col black" data-cl="1c"></div>
-            <div class="col white" data-cl="1d"></div>
-            <div class="col black" data-cl="1e"></div>
-            <div class="col white" data-cl="1f"></div>
-            <div class="col black" data-cl="1g"></div>
-            <div class="col white" data-cl="1h"></div>
-        </div>
-        <div class="row__le">
-            <p>a</p>
-            <p>b</p>
-            <p>c</p>
-            <p>d</p>
-            <p>e</p>
-            <p>f</p>
-            <p>g</p>
-            <p>h</p>
+        <div class="score">
+            <h4>Blacks</h4>
+            <div id="B">
+            </div>
         </div>
     </div>
+    <!-- <button onclick="blackPlayed('W')">Black played</button>
+    <button onclick="blackPlayed('B')">White played</button> -->
     <script src="./index.js"></script>
 </body>
 </html>

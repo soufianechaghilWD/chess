@@ -34,6 +34,41 @@ var playerW = {
     "2g": "pawnW",
     "2h": "pawnW",
 }
+var start_game = false
+var turn = null
+
+const set_You_Are_Playing = (who) => {
+    if(who === "B"){
+        var ele1 = document.getElementById('W')
+        if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
+    }else{
+        var ele1 = document.getElementById('B')
+        if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
+    }
+    let ele = document.getElementById(who)
+    var chi = document.createElement('p')
+    chi.innerText = "Your Turn"
+    chi.classList.add('you_R_playing')
+    ele.appendChild(chi)
+}
+
+/*const blackPlayed = (who) => {
+    if(turn !== who){
+        turn = who
+        set_You_Are_Playing(turn)
+    }
+}*/
+
+const startGame = () => {
+    if(start_game === false) {
+        start_game=true
+        var score = document.querySelectorAll('.score')
+        score.forEach(scoree => scoree.classList.add('score_show'))
+        turn = "W"
+        set_You_Are_Playing(turn)
+    }
+}
+
 const setPlayers = () => {
     // Get all keys of object playerB 
     const playerB_Pos = Object.keys(playerB)
