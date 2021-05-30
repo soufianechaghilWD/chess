@@ -1,3 +1,5 @@
+// import { can_it } from "./can_it"
+
 var playerB = {
     "8a" : "rookB",
     "8b" : "knightB",
@@ -88,4 +90,54 @@ const setPlayers = () => {
         chi.src = './files/'+playerW[ele]+'.png'
         elem.appendChild(chi)
     })
+}
+
+function get_the_user_from_the_ele (ele) {
+    // get B if the selected element is a black element and W if the selected element is white
+    return ele?.childNodes[0]?.getAttribute('src').split('/')[ele?.childNodes[0]?.getAttribute('src')?.split('/')?.length - 1]?.split('.')[0]?.split('')?.pop()
+}
+
+function get_the_piece (ele) {
+    // get the piece's type
+    return ele?.childNodes[0]?.getAttribute('src').split('/')[ele?.childNodes[0]?.getAttribute('src')?.split('/')?.length - 1]?.split('.')[0]
+}
+
+function get_the_position (ele) {
+    // get the position of the ele
+    return ele?.getAttribute('data-cl')
+}
+
+// var first_click = false
+// var second_click = false
+var last_click = null
+
+function move_a_piece_to_blank_pos (where, from) {
+    console.log(from)
+    var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
+    rm_ele.removeChild(rm_ele.childNodes[0])
+    var chil = document.createElement('img')
+    chil.src = './files/'+from.piece+'.png'
+    where.appendChild(chil)
+}
+
+const makeAmove = (ele) => {
+    // check if the game is on and if the user's turn and if position is the users's
+    if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
+        // check if its the first click or not
+        if(last_click === null){
+            last_click = {
+                "pos" : get_the_position(ele),
+                "piece" : get_the_piece(ele)
+            }
+        }else{
+            // Check if the new position is blank or not(the user is going to take the opponent's piece)
+            if(ele?.childNodes?.length === 0){
+                // Need to check if the piece can make the move and the king isn't in danger
+                /*if(can_it(playerB, playerW, ele, last_click)){
+
+                }*/
+                move_a_piece_to_blank_pos(ele, last_click)
+            }
+        }
+    }
 }
