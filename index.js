@@ -1,5 +1,3 @@
-// import { can_it } from "./can_it"
-
 var playerB = {
     "8a" : "rookB",
     "8b" : "knightB",
@@ -120,6 +118,263 @@ function move_a_piece_to_blank_pos (where, from) {
     where.appendChild(chil)
 }
 
+function letter_up (letter, up) {
+    if(letter === "h" && up === 1) return null
+    else if(letter === "a" && up === -1) return null
+    else {
+        let asci = letter.charCodeAt(0)
+        if(String.fromCharCode(asci + up) > 'h' || String.fromCharCode(asci + up) < 'a') return null
+        else return String.fromCharCode(asci + up)
+    }
+}
+
+function pawn (pos, who) {
+    if(who === "W"){
+        var res = [(parseInt(pos[0])+1)+pos[1]]
+        if(letter_up(pos[1], 1) !== null) res.push((parseInt(pos[0])+1)+letter_up(pos[1], 1))
+        if(letter_up(pos[1], -1) !== null) res.push((parseInt(pos[0])+1)+letter_up(pos[1], -1))        
+        if(pos[0] === "2"){
+            res.push(parseInt(pos[0])+2+pos[1])
+        }
+        return res
+    }else{
+        var res = [(parseInt(pos[0])-1)+pos[1]]
+        if(letter_up(pos[1], 1) !== null) res.push((parseInt(pos[0])-1)+letter_up(pos[1], 1))
+        if(letter_up(pos[1], -1) !== null) res.push((parseInt(pos[0])-1)+letter_up(pos[1], -1))
+        if(pos[0] === "7"){
+            res.push(parseInt(pos[0])-2+pos[1])
+        }
+        return res
+    }
+}
+
+function rook (pos) {
+    var res = []
+    for(let i = parseInt(pos[0]) + 1; i <= 8; i++){
+        res.push(i+pos[1])
+    }
+    for(let i = parseInt(pos[0]) - 1; i >= 1; i--){
+        res.push(i+pos[1])
+    }
+    let j = letter_up(pos[1], 1)
+    while(j <= "h" && j !== null){
+        res.push(pos[0]+j)
+        j = letter_up(j, 1)
+    }
+    let k = letter_up(pos[1], -1)
+    while(k >= "a" && k !== null){
+        res.push(pos[0]+k)
+        k = letter_up(k, -1)
+    }
+    return res
+}
+
+function knight (pos) {
+    var res = []
+    if( parseInt(pos[0]) + 2 <= 8 && letter_up(pos[1], 1) !== null) res.push((parseInt(pos[0]) + 2) + letter_up(pos[1], 1))
+    if(parseInt(pos[0]) + 1 <= 8 && letter_up(pos[1], 2) !== null) res.push((parseInt(pos[0]) + 1) + letter_up(pos[1], 2))
+    if(parseInt(pos[0]) - 2 >= 1 && letter_up(pos[1], 1) !== null) res.push((parseInt(pos[0]) - 2) + letter_up(pos[1], 1))
+    if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], 2) !== null) res.push((parseInt(pos[0]) - 1) + letter_up(pos[1], 2))
+    if( parseInt(pos[0]) + 2 <= 8 && letter_up(pos[1], -1) !== null) res.push((parseInt(pos[0]) + 2) + letter_up(pos[1], -1))
+    if(parseInt(pos[0]) + 1 <= 8 && letter_up(pos[1], -2) !== null) res.push((parseInt(pos[0]) + 1) + letter_up(pos[1], -2))
+    if(parseInt(pos[0]) - 2 >= 1 && letter_up(pos[1], -1) !== null) res.push((parseInt(pos[0]) - 2) + letter_up(pos[1], -1))
+    if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], -2) !== null) res.push((parseInt(pos[0]) - 1) + letter_up(pos[1], -2))
+    return res
+}
+
+function bishop (pos) {
+    var res = []
+    let j = letter_up(pos[1], 1)
+    let i = parseInt(pos[0]) + 1
+    while(j <= "h" && i  <= 8 && i !== null && j !== null){
+        res.push(i+j)
+        j = letter_up(j, 1)
+        i = parseInt(i) + 1
+    }
+    let j1 = letter_up(pos[1], -1)
+    let i1 = parseInt(pos[0]) + 1
+    while(j1 >= "a" && i1  <= 8 && i1 !== null && j1 !== null){
+        res.push(i1+j1)
+        j1 = letter_up(j1, -1)
+        i1 = parseInt(i1) + 1
+    }
+    let j2 = letter_up(pos[1], 1)
+    let i2 = parseInt(pos[0]) - 1
+    while(j2 <= "h" && i2  >= 1 && i2 !== null && j2 !== null){
+        res.push(i2+j2)
+        j2 = letter_up(j2, 1)
+        i2 = parseInt(i2) - 1
+    }
+    let j3 = letter_up(pos[1], -1)
+    let i3 = parseInt(pos[0]) - 1
+    while(j3 <= "h" && i3  >= 1 && i3 !== null && j3 !== null){
+        res.push(i3+j3)
+        j3 = letter_up(j3, -1)
+        i3 = parseInt(i3) - 1
+    }
+    return res
+}
+
+function king (pos) {
+    var res = []
+    if(parseInt(pos[0]) + 1 <= 8) res.push((parseInt(pos[0]) + 1)+pos[1])
+    if(parseInt(pos[0]) - 1 >= 1) res.push((parseInt(pos[0]) - 1)+pos[1])
+    if(letter_up(pos[1], 1) <= "h") res.push(pos[0]+letter_up(pos[1], 1))
+    if(letter_up(pos[1], -1) >= "a") res.push(pos[0]+letter_up(pos[1], -1))
+    if(parseInt(pos[0]) + 1 <= 8 && letter_up(pos[1], 1) <= "h") res.push((parseInt(pos[0]) + 1)+letter_up(pos[1], 1))
+    if(parseInt(pos[0]) + 1 <= 8 && letter_up(pos[1], -1) >= "a") res.push((parseInt(pos[0]) + 1)+letter_up(pos[1], -1))
+    if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], 1) <= "h") res.push((parseInt(pos[0]) - 1)+ letter_up(pos[1], 1))
+    if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], -1) >= "a") res.push((parseInt(pos[0]) - 1)+letter_up(pos[1], -1))
+    return res
+}
+
+const all_poss = (piece, pos) => {
+    // Get possible moves for every piece at a given position
+    switch (piece?.substring(0, piece?.length - 1)){
+        case "pawn":
+            return pawn(pos, piece?.split('')?.pop())
+        case "rook":
+            return rook(pos)
+        case "knight":
+            return knight(pos)
+        case "bishop":
+            return bishop(pos)
+        case "king": 
+            return king(pos)
+        case "queen":
+            return rook(pos).concat(bishop(pos))
+        default:
+            return null
+    }
+}
+
+const getBetween  = (where1, where2, type) => {
+    var res = []
+    if(type === "number"){
+        if(where1[1] > where2[1]){
+            let h = letter_up(where1[1], -1)
+            while(h > where2[1] && h !== null){
+                res.push(where1[0]+h)
+                h = letter_up(h, -1)
+            }
+        }else{
+            let h = letter_up(where1[1], 1)
+            while(h < where2[1] && h !== null){
+                res.push(where1[0]+h)
+                h = letter_up(h, 1)
+            }
+        }
+    }else if(type === "letter"){
+        if(parseInt(where1[0]) > parseInt(where2[0])){
+            let h = parseInt(where1[0]) - 1
+            while(h > parseInt(where2[0]) && h !== null){
+                res.push(h+where1[1])
+                h = h - 1
+            }
+        }else{
+            let h = parseInt(where1[0]) + 1
+            while(h < parseInt(where2[0]) && h !== null){
+                res.push(h+where1[1])
+                h = h + 1
+            }
+        }
+    }else{
+        if(parseInt(where1[0]) > parseInt(where2[0])){
+            if(where1[1] > where2[1]){
+                let i = parseInt(where1[0]) - 1
+                let j = letter_up(where1[1], -1)
+                while(i > parseInt(where2[0]) && j > where2[1] && j !== null){
+                    res.push(i+j)
+                    i = parseInt(i) - 1
+                    j = letter_up(j, -1)
+                }
+            }else{
+                let i = parseInt(where1[0]) - 1
+                let j = letter_up(where1[1], 1)
+                while(i > parseInt(where2[0]) && j < where2[1] && j !== null){
+                    res.push(i+j)
+                    i = parseInt(i) - 1
+                    j = letter_up(j, 1)
+                }
+            }
+        }else{
+            if(where1[1] > where2[1]){
+                let i = parseInt(where1[0]) + 1
+                let j = letter_up(where1[1], -1)
+                while(i < parseInt(where2[0]) && j > where2[1] && j !== null){
+                    res.push(i+j)
+                    i = parseInt(i) + 1
+                    j = letter_up(j, -1)
+                }
+            }else{
+                let i = parseInt(where1[0]) + 1
+                let j = letter_up(where1[1], 1)
+                while(i < parseInt(where2[0]) && j < where2[1] && j !== null){
+                    res.push(i+j)
+                    i = parseInt(i) + 1
+                    j = letter_up(j, 1)
+                }
+            }
+        }
+    }
+    return res
+}
+
+const is_king_in_danger = (me, opponent) => {
+    // Check if the king is under attack
+    var king_pos = null
+    for(let i = 0; i < Object.keys(me).length; i++){
+        // Set the king position
+        if(me[Object.keys(me)[i]]?.substring(0, me[Object.keys(me)[i]]?.length - 1) === "king") king_pos = Object.keys(me)[i]
+    }
+    for(let j = 0; j < Object.keys(opponent).length; j++){
+        // Loop through the opponent pieces
+        if(opponent[Object.keys(opponent)[j]].substring(0, opponent[Object.keys(opponent)[j]]?.length - 1) === "knight") {// if the piece is a knight check if it threatens the king 
+            if(all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j]).some(x => x === king_pos)) return true
+        }else if(opponent[Object.keys(opponent)[j]].substring(0, opponent[Object.keys(opponent)[j]]?.length - 1) === "pawn"){ // if the piece is a pawn
+            var res = all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j]).filter(x => x[1] !== Object.keys(opponent)[j][1])
+            // return [Object.keys(opponent)[j], all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j])]
+            if(res.some(x => x === king_pos)) return true
+        }
+        else{
+            // check if other pieces threatning the king
+            if(all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j]).some(x => king_pos === x)){ // check if the king is a possible native move for a piece
+                if(Object.keys(opponent)[j][0] === king_pos[0]){ // check if the piece and the king have the same number in position
+                    const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "number")
+                    // check if there's another piece in between the king and the threatening piece
+                    if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
+                    // return  getBetween(Object.keys(opponent)[j], king_pos, "number")
+                }else if (Object.keys(opponent)[j][1] === king_pos[1]){ // check if the piece and the king have the same letter in position
+                    const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "letter")
+                    // check if there's another piece in between the king and the threatening piece
+                    if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
+                    // return getBetween(Object.keys(opponent)[j], king_pos, "letter")
+                }else{
+                    const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "otherwise")
+                    // check if there's another piece in between the king and the threatening piece
+                    if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
+                    // return getBetween(Object.keys(opponent)[j], king_pos, "otherwise")
+                }
+            }
+        }
+    }
+    return false
+}
+
+const can_it = (from, to, me, opponent) => {
+    if(all_poss(from.piece, from.pos).some(x => x === to)){
+        var me_prime = Object.assign({}, me)
+        delete me_prime[`${from.pos}`]
+        me_prime[`${to}`] = from.piece
+        return !is_king_in_danger(me_prime, opponent)
+    }
+
+    return false
+}
+/*
+console.log(is_king_in_danger({"2a": "pawnW", "5e": "kingW"}, {"4f": "pawnB", "8e": "kingB", "3h": "queenB"}))
+*/
+
 const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
     if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
@@ -133,10 +388,31 @@ const makeAmove = (ele) => {
             // Check if the new position is blank or not(the user is going to take the opponent's piece)
             if(ele?.childNodes?.length === 0){
                 // Need to check if the piece can make the move and the king isn't in danger
-                /*if(can_it(playerB, playerW, ele, last_click)){
-
-                }*/
-                move_a_piece_to_blank_pos(ele, last_click)
+                var me = null
+                var opponent = null
+                if(turn === "W"){
+                    me = Object.assign({}, playerW)
+                    opponent = Object.assign({}, playerB)
+                }else{
+                    me = Object.assign({}, playerB)
+                    opponent = Object.assign({}, playerW)
+                }
+                if(can_it(last_click, get_the_position(ele), me, opponent)){
+                    move_a_piece_to_blank_pos(ele, last_click)
+                    if(turn === "W") {
+                        delete playerW[`${last_click.pos}`]
+                        playerW[`${get_the_position(ele)}`] = last_click.piece
+                        turn = "B"
+                    }
+                    else {
+                        delete playerB[`${last_click.pos}`]
+                        playerB[`${get_the_position(ele)}`] = last_click.piece
+                        turn = "W"
+                    }
+                    set_You_Are_Playing(turn)
+                    last_click = null
+                    console.log(last_click, playerB, playerW)
+                }
             }
         }
     }
