@@ -367,6 +367,19 @@ const can_it = (from, to, me, opponent) => {
 
     return false
 }
+
+const can_it__full = (from, to, me, opponent) => {
+    if(all_poss(from.piece, from.pos).some(x => x === to)){
+        var me_prime = Object.assign({}, me)
+        delete me_prime[`${from.pos}`]
+        me_prime[`${to}`] = from.piece
+        var opp_prime = Object.assign({}, opponent)
+        delete opp_prime[`${to}`]        
+        return !is_king_in_danger(me_prime, opp_prime)
+    }
+
+    return false
+}
 /*
 console.log(is_king_in_danger({"2a": "pawnW", "5e": "kingW"}, {"4f": "pawnB", "8e": "kingB", "3h": "queenB"}))
 */
@@ -397,6 +410,23 @@ const check_road = (player1, player2, from, to) => {
     
 }
 
+const move_a_piece_to_full_pos = (from, to) => {
+    var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
+    rm_ele.removeChild(rm_ele.childNodes[0])
+    var chil = document.createElement('img')
+    chil.src = './files/'+from.piece+'.png'
+    var rm_to = document.querySelector(`[data-cl = "${to}"]`)
+    rm_to.removeChild(rm_to.childNodes[0])
+    rm_to.appendChild(chil)
+}
+
+const add_to_score_list = (piece, who) => {
+    var ele = document.getElementById(`score_${who}`)
+    var chi = document.createElement('img')
+    chi.src = "./files/"+piece+".png"
+    ele.appendChild(chi)
+}
+
 const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
     if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
@@ -410,8 +440,9 @@ const makeAmove = (ele) => {
             // select__Poss(all_poss(last_click.piece, last_click.pos), last_click.piece)
         }else{
             // Check if the new position is blank or not(the user is going to take the opponent's piece)
-            if(ele?.childNodes?.length === 0 && !check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
-                // Need to check if the piece can make the move and the king isn't in danger
+            if(ele?.childNodes?.length === 0){
+                if(!check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
+                    // Need to check if the piece can make the move and the king isn't in danger
                 var me = null
                 var opponent = null
                 if(turn === "W"){
@@ -458,6 +489,7 @@ const makeAmove = (ele) => {
                         // unselect__pos()
                     }
                 }
+                }
             }else if(get_the_user_from_the_ele(ele) === turn){
                 last_click = {
                     "pos": get_the_position(ele),
@@ -467,6 +499,37 @@ const makeAmove = (ele) => {
                 selected(last_click.pos)
                 // unselect__pos()
                 // select__Poss(all_poss(last_click.piece, last_click.pos))
+            }else{
+                if(!check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
+                    var me = null
+                    var opponent = null
+                    if(turn === "W"){
+                        me = Object.assign({}, playerW)
+                        opponent = Object.assign({}, playerB)
+                    }else{
+                        me = Object.assign({}, playerB)
+                        opponent = Object.assign({}, playerW)
+                    }
+                    if(can_it__full(last_click, get_the_position(ele), me, opponent)){
+                        add_to_score_list(get_the_piece(ele), turn)
+                        move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                        if(turn === "W") {
+                            delete playerW[`${last_click.pos}`]
+                            playerW[`${get_the_position(ele)}`] = last_click.piece
+                            delete playerB[`${get_the_position(ele)}`]
+                            turn = "B"
+                        }
+                        else {
+                            delete playerB[`${last_click.pos}`]
+                            playerB[`${get_the_position(ele)}`] = last_click.piece
+                            delete playerW[`${get_the_position(ele)}`]
+                            turn = "W"
+                        }
+                        set_You_Are_Playing(turn)
+                        last_click = null
+                        selected(null)
+                    }
+                }
             }
         }
     }
