@@ -110,7 +110,6 @@ function get_the_position (ele) {
 var last_click = null
 
 function move_a_piece_to_blank_pos (where, from) {
-    console.log(from)
     var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
     rm_ele.removeChild(rm_ele.childNodes[0])
     var chil = document.createElement('img')
@@ -343,17 +342,14 @@ const is_king_in_danger = (me, opponent) => {
                     const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "number")
                     // check if there's another piece in between the king and the threatening piece
                     if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
-                    // return  getBetween(Object.keys(opponent)[j], king_pos, "number")
                 }else if (Object.keys(opponent)[j][1] === king_pos[1]){ // check if the piece and the king have the same letter in position
                     const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "letter")
                     // check if there's another piece in between the king and the threatening piece
                     if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
-                    // return getBetween(Object.keys(opponent)[j], king_pos, "letter")
                 }else{
                     const inBetween = getBetween(Object.keys(opponent)[j], king_pos, "otherwise")
                     // check if there's another piece in between the king and the threatening piece
                     if(!Object.keys(opponent)?.some(x => inBetween?.some(y => y === x)) && !Object.keys(me)?.some(x => inBetween?.some(y => y === x))) return true
-                    // return getBetween(Object.keys(opponent)[j], king_pos, "otherwise")
                 }
             }
         }
@@ -375,6 +371,32 @@ const can_it = (from, to, me, opponent) => {
 console.log(is_king_in_danger({"2a": "pawnW", "5e": "kingW"}, {"4f": "pawnB", "8e": "kingB", "3h": "queenB"}))
 */
 
+const selected = (where) => {
+    if(where !== null){
+        var ele = document.querySelector(`[data-cl = "${where}"]`)
+        ele.classList.add('selected')
+    }else{
+        var all = document.querySelectorAll('.col')
+        all.forEach(ele => ele.classList.remove('selected'))
+    }
+}
+
+/*const select__Poss = (eles, piece) => {
+    eles.forEach(ele => document.querySelector(`[data-cl = "${ele}"]`).classList.add('poss'))
+}
+const unselect__pos =  () => {
+    document.querySelectorAll('.col').forEach(ele => ele.classList.remove('poss'))
+}*/
+
+const check_road = (player1, player2, from, to) => {
+    var road = []
+    if(from[0] === to[0]) road = getBetween(from, to, "number")
+    else if(from[1] === to[1]) road = getBetween(from, to, "letter")
+    else road = getBetween(from, to, "otherwise")
+    return (Object.keys(player1)?.some(x => road.some(y => y === x)) || Object.keys(player2)?.some(x => road.some(y => y === x)))
+    
+}
+
 const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
     if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
@@ -384,9 +406,11 @@ const makeAmove = (ele) => {
                 "pos" : get_the_position(ele),
                 "piece" : get_the_piece(ele)
             }
+            selected(last_click.pos)
+            // select__Poss(all_poss(last_click.piece, last_click.pos), last_click.piece)
         }else{
             // Check if the new position is blank or not(the user is going to take the opponent's piece)
-            if(ele?.childNodes?.length === 0){
+            if(ele?.childNodes?.length === 0 && !check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
                 // Need to check if the piece can make the move and the king isn't in danger
                 var me = null
                 var opponent = null
@@ -398,21 +422,51 @@ const makeAmove = (ele) => {
                     opponent = Object.assign({}, playerW)
                 }
                 if(can_it(last_click, get_the_position(ele), me, opponent)){
-                    move_a_piece_to_blank_pos(ele, last_click)
-                    if(turn === "W") {
-                        delete playerW[`${last_click.pos}`]
-                        playerW[`${get_the_position(ele)}`] = last_click.piece
-                        turn = "B"
+                    if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "pawn"){//check if the piece that's being moved is a pawn to prevent to move aside
+                        if(all_poss(last_click.piece, last_click.pos).filter(x => x[1] === last_click.pos[1]).some(x => x === get_the_position(ele))){
+                            move_a_piece_to_blank_pos(ele, last_click)
+                            if(turn === "W") {
+                                delete playerW[`${last_click.pos}`]
+                                playerW[`${get_the_position(ele)}`] = last_click.piece
+                                turn = "B"
+                            }
+                            else {
+                                delete playerB[`${last_click.pos}`]
+                                playerB[`${get_the_position(ele)}`] = last_click.piece
+                                turn = "W"
+                            }
+                            set_You_Are_Playing(turn)
+                            last_click = null
+                            selected(null)
+                            // unselect__pos()
+                        }
+                    }else{
+                        move_a_piece_to_blank_pos(ele, last_click)
+                        if(turn === "W") {
+                            delete playerW[`${last_click.pos}`]
+                            playerW[`${get_the_position(ele)}`] = last_click.piece
+                            turn = "B"
+                        }
+                        else {
+                            delete playerB[`${last_click.pos}`]
+                            playerB[`${get_the_position(ele)}`] = last_click.piece
+                            turn = "W"
+                        }
+                        set_You_Are_Playing(turn)
+                        last_click = null
+                        selected(null)
+                        // unselect__pos()
                     }
-                    else {
-                        delete playerB[`${last_click.pos}`]
-                        playerB[`${get_the_position(ele)}`] = last_click.piece
-                        turn = "W"
-                    }
-                    set_You_Are_Playing(turn)
-                    last_click = null
-                    console.log(last_click, playerB, playerW)
                 }
+            }else if(get_the_user_from_the_ele(ele) === turn){
+                last_click = {
+                    "pos": get_the_position(ele),
+                    "piece": get_the_piece(ele)
+                }
+                selected(null)
+                selected(last_click.pos)
+                // unselect__pos()
+                // select__Poss(all_poss(last_click.piece, last_click.pos))
             }
         }
     }

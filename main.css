@@ -82,5 +82,11 @@ body > h1{
     background: white;
 }
 .you_R_playing{
-    font-weight: 800    ;
+    font-weight: 800;
+}
+.selected{
+    background: red;
+}
+.poss{
+    background: greenyellow;
 }
