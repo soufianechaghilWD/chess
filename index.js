@@ -47,7 +47,7 @@ const set_You_Are_Playing = (who) => {
     }
     let ele = document.getElementById(who)
     var chi = document.createElement('p')
-    chi.innerText = "Your Turn"
+    chi.innerText = "Your Turn - - -"
     chi.classList.add('you_R_playing')
     ele.appendChild(chi)
 }
@@ -410,6 +410,16 @@ const check_road = (player1, player2, from, to) => {
     
 }
 
+const check_road_prime = (player1, player2, from, to) => {
+    var road = []
+    if(from[0] === to[0]) road = getBetween(from, to, "number")
+    else if(from[1] === to[1]) road = getBetween(from, to, "letter")
+    else road = getBetween(from, to, "otherwise")
+    if(road.length === 0) return null
+    return (Object.keys(player1)?.some(x => road.some(y => y === x)) || Object.keys(player2)?.some(x => road.some(y => y === x)))
+    
+}
+
 const move_a_piece_to_full_pos = (from, to) => {
     var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
     rm_ele.removeChild(rm_ele.childNodes[0])
@@ -425,6 +435,47 @@ const add_to_score_list = (piece, who) => {
     var chi = document.createElement('img')
     chi.src = "./files/"+piece+".png"
     ele.appendChild(chi)
+}
+
+
+const in_danger = (who) => {
+    var where = null
+    for(let i = 0; i < Object.keys(who).length; i++){
+        if(who[Object.keys(who)[i]]?.substring(0, who[Object.keys(who)[i]]?.length - 1) === "king"){
+            where = Object.keys(who)[i]
+        }
+    }
+    var ele = document.querySelector(`[data-cl = "${where}"]`)
+    ele.classList.add('king_in_danger')
+}
+
+
+const remove_danger = () => {
+    var eles = document.querySelectorAll('.col')
+    eles.forEach(ele => ele.classList.remove('king_in_danger'))
+}
+
+const get_king_pos = (ele) => {
+    var pos = null
+    for(let i = 0; i < Object.keys(ele).length; i++){
+        if(ele[Object.keys(ele)[i]].substring(0, ele[Object.keys(ele)[i]].length - 1) === "king") pos = Object.keys(ele)[i]
+    }
+    return pos
+}
+
+const checkWin__blank = (me, opponent) => {
+    for(let i = 0; i < Object.keys(opponent).length; i++){
+        var piece = opponent[Object.keys(opponent)[i]]
+        var pos = Object.keys(opponent)[i]
+        var poss = all_poss(piece, pos)
+        console.log(pos, poss,  poss[0], check_road_prime(me, opponent, pos, poss[0]))
+        /*for(let j = 0; j < poss.length; j++){
+            if(can_it({piece: piece, pos: pos}, poss[j], opponent, me)){
+
+            }
+        }*/
+    }
+    return false
 }
 
 const makeAmove = (ele) => {
@@ -460,11 +511,25 @@ const makeAmove = (ele) => {
                                 delete playerW[`${last_click.pos}`]
                                 playerW[`${get_the_position(ele)}`] = last_click.piece
                                 turn = "B"
+                                // check if the opponent's king in danger
+                                if(is_king_in_danger(playerB, playerW)){
+                                    in_danger(playerB)
+                                }else{
+                                    remove_danger()
+                                }
+                                console.log(checkWin__blank(playerW, playerB))
                             }
                             else {
                                 delete playerB[`${last_click.pos}`]
                                 playerB[`${get_the_position(ele)}`] = last_click.piece
                                 turn = "W"
+                                // check if the opponent's king in danger
+                                if(is_king_in_danger(playerW, playerB)){
+                                    in_danger(playerW)
+                                }else{
+                                    remove_danger()
+                                }
+                                console.log(checkWin__blank(playerB, playerW))
                             }
                             set_You_Are_Playing(turn)
                             last_click = null
@@ -477,11 +542,26 @@ const makeAmove = (ele) => {
                             delete playerW[`${last_click.pos}`]
                             playerW[`${get_the_position(ele)}`] = last_click.piece
                             turn = "B"
+                                // check if the opponent's king in danger
+                                if(is_king_in_danger(playerB, playerW)){
+                                in_danger(playerB)
+                            }else{
+                                remove_danger()
+                            }
+                            console.log(checkWin__blank(playerW, playerB))
+
                         }
                         else {
                             delete playerB[`${last_click.pos}`]
                             playerB[`${get_the_position(ele)}`] = last_click.piece
                             turn = "W"
+                                // check if the opponent's king in danger
+                                if(is_king_in_danger(playerW, playerB)){
+                                in_danger(playerW)
+                            }else{
+                                remove_danger()
+                            }
+                            console.log(checkWin__blank(playerW, playerB))
                         }
                         set_You_Are_Playing(turn)
                         last_click = null
@@ -501,33 +581,86 @@ const makeAmove = (ele) => {
                 // select__Poss(all_poss(last_click.piece, last_click.pos))
             }else{
                 if(!check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
-                    var me = null
-                    var opponent = null
-                    if(turn === "W"){
-                        me = Object.assign({}, playerW)
-                        opponent = Object.assign({}, playerB)
+                    if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "pawn"){ // check if the piece is a pawn (because the pawn can't take a piece if it's in front of him)
+                        if(all_poss(last_click?.piece, last_click.pos).filter(x => x[1] !== last_click?.pos[1]).some(x => x == get_the_position(ele))){
+                            var me = null
+                            var opponent = null
+                            if(turn === "W"){
+                                me = Object.assign({}, playerW)
+                                opponent = Object.assign({}, playerB)
+                            }else{
+                                me = Object.assign({}, playerB)
+                                opponent = Object.assign({}, playerW)
+                            }
+                            if(can_it__full(last_click, get_the_position(ele), me, opponent)){
+                                add_to_score_list(get_the_piece(ele), turn)
+                                move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                                if(turn === "W") {
+                                    delete playerW[`${last_click.pos}`]
+                                    playerW[`${get_the_position(ele)}`] = last_click.piece
+                                    delete playerB[`${get_the_position(ele)}`]
+                                    turn = "B"
+                                    if(is_king_in_danger(playerB, playerW)){
+                                        in_danger(playerB)
+                                    }else{
+                                        remove_danger()
+                                    }
+                                }
+                                else {
+                                    delete playerB[`${last_click.pos}`]
+                                    playerB[`${get_the_position(ele)}`] = last_click.piece
+                                    delete playerW[`${get_the_position(ele)}`]
+                                    turn = "W"
+                                    if(is_king_in_danger(playerW, playerB)){
+                                        in_danger(playerW)
+                                    }else{
+                                        remove_danger()
+                                    }
+                                }
+                                set_You_Are_Playing(turn)
+                                last_click = null
+                                selected(null)
+                            } 
+                        }                     
                     }else{
-                        me = Object.assign({}, playerB)
-                        opponent = Object.assign({}, playerW)
-                    }
-                    if(can_it__full(last_click, get_the_position(ele), me, opponent)){
-                        add_to_score_list(get_the_piece(ele), turn)
-                        move_a_piece_to_full_pos(last_click, get_the_position(ele))
-                        if(turn === "W") {
-                            delete playerW[`${last_click.pos}`]
-                            playerW[`${get_the_position(ele)}`] = last_click.piece
-                            delete playerB[`${get_the_position(ele)}`]
-                            turn = "B"
+                        var me = null
+                        var opponent = null
+                        if(turn === "W"){
+                            me = Object.assign({}, playerW)
+                            opponent = Object.assign({}, playerB)
+                        }else{
+                            me = Object.assign({}, playerB)
+                            opponent = Object.assign({}, playerW)
                         }
-                        else {
-                            delete playerB[`${last_click.pos}`]
-                            playerB[`${get_the_position(ele)}`] = last_click.piece
-                            delete playerW[`${get_the_position(ele)}`]
-                            turn = "W"
+                        if(can_it__full(last_click, get_the_position(ele), me, opponent)){
+                            add_to_score_list(get_the_piece(ele), turn)
+                            move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                            if(turn === "W") {
+                                delete playerW[`${last_click.pos}`]
+                                playerW[`${get_the_position(ele)}`] = last_click.piece
+                                delete playerB[`${get_the_position(ele)}`]
+                                turn = "B"
+                                if(is_king_in_danger(playerB, playerW)){
+                                    in_danger(playerB)
+                                }else{
+                                    remove_danger()
+                                }
+                            }
+                            else {
+                                delete playerB[`${last_click.pos}`]
+                                playerB[`${get_the_position(ele)}`] = last_click.piece
+                                delete playerW[`${get_the_position(ele)}`]
+                                turn = "W"
+                                if(is_king_in_danger(playerW, playerB)){
+                                    in_danger(playerW)
+                                }else{
+                                    remove_danger()
+                                }
+                            }
+                            set_You_Are_Playing(turn)
+                            last_click = null
+                            selected(null)
                         }
-                        set_You_Are_Playing(turn)
-                        last_click = null
-                        selected(null)
                     }
                 }
             }
