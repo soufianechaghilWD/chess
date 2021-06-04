@@ -38,6 +38,15 @@ var start_game = false
 var turn = null
 var last_click = null
 
+var king_moved = {
+    "W": false,
+    "B": false
+}
+
+var rookLeft = {
+    "W": false,
+    "B": false
+}
 const set_You_Are_Playing = (who) => {
     if(who !== null){
         if(who === "B"){
@@ -216,6 +225,8 @@ function king (pos) {
     if(parseInt(pos[0]) + 1 <= 8 && letter_up(pos[1], -1) >= "a") res.push((parseInt(pos[0]) + 1)+letter_up(pos[1], -1))
     if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], 1) <= "h") res.push((parseInt(pos[0]) - 1)+ letter_up(pos[1], 1))
     if(parseInt(pos[0]) - 1 >= 1 && letter_up(pos[1], -1) >= "a") res.push((parseInt(pos[0]) - 1)+letter_up(pos[1], -1))
+    if(pos[0] === "1" && pos[1] === "e" && king_moved.W === false && rookLeft.W === false) res.push(pos[0]+letter_up(pos[1], -2))
+    if(pos[0] === "8" && pos[1] === "e" && king_moved.B === false && rookLeft.B === false) res.push(pos[0]+letter_up(pos[1], -2))
     return res
 }
 
@@ -324,7 +335,6 @@ const is_king_in_danger = (me, opponent) => {
             if(all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j]).some(x => x === king_pos)) return true
         }else if(opponent[Object.keys(opponent)[j]].substring(0, opponent[Object.keys(opponent)[j]]?.length - 1) === "pawn"){ // if the piece is a pawn
             var res = all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j]).filter(x => x[1] !== Object.keys(opponent)[j][1])
-            // return [Object.keys(opponent)[j], all_poss(opponent[Object.keys(opponent)[j]], Object.keys(opponent)[j])]
             if(res.some(x => x === king_pos)) return true
         }
         else{
@@ -544,7 +554,6 @@ const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
         // check if the opponent's king in danger
         if(is_king_in_danger(playerB, playerW)){
             in_danger(playerB)
-            console.log("did u win W??", check_win(playerB, playerW))
             if(check_win(playerB, playerW)){
                 win_Detected('W')
             }
@@ -561,7 +570,6 @@ const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
         // check if the opponent's king in danger
         if(is_king_in_danger(playerW, playerB)){
             in_danger(playerW)
-            console.log("did u win B??", check_win(playerW, playerB))
             if(check_win(playerW, playerB)){
                 win_Detected('B')
             }
@@ -570,9 +578,7 @@ const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
         }
         
     }
-    console.log(playerW, playerB)
     set_You_Are_Playing(turn)
-    last_click = null
     selected(null)
 }
 
@@ -592,8 +598,11 @@ const newPlayers = (playerW, playerB, turn) => {
 
 const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
-    if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
-        // check if its the first click or not
+    // if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
+        if((turn === get_the_user_from_the_ele(ele) || last_click !== null ) && start_game){
+            console.log("just clicked", last_click, turn, get_the_user_from_the_ele(ele))
+            // check if its the first click or not
+        console.log("inside")
         if(last_click === null){
             last_click = {
                 "pos" : get_the_position(ele),
@@ -622,6 +631,7 @@ const makeAmove = (ele) => {
                                     move_piece(turn, last, playerB, playerW, ele, false)
                                     if(turn === "W") turn = "B"
                                     else turn = "W"
+                                    last_click = null
                                 }
                                 if(asked_piece === "r" || asked_piece === "R"){
                                     var last = {pos: last_click.pos, piece: "rook"+turn}
@@ -629,6 +639,7 @@ const makeAmove = (ele) => {
                                     move_piece(turn, last, playerB, playerW, ele, false)
                                     if(turn === "W") turn = "B"
                                     else turn = "W"
+                                    last_click = null
                                 }
                                 if(asked_piece === "k" || asked_piece === "K"){
                                     var last = {pos: last_click.pos, piece: "knight"+turn}
@@ -636,6 +647,7 @@ const makeAmove = (ele) => {
                                     move_piece(turn, last, playerB, playerW, ele, false)
                                     if(turn === "W") turn = "B"
                                     else turn = "W"
+                                    last_click = null
                                 }
                                 if(asked_piece === "b" || asked_piece === "B"){
                                     var last = {pos: last_click.pos, piece: "bishop"+turn}
@@ -643,12 +655,14 @@ const makeAmove = (ele) => {
                                     move_piece(turn, last, playerB, playerW, ele, false)
                                     if(turn === "W") turn = "B"
                                     else turn = "W"
+                                    last_click = null
                                 }
                             }else{
                                 move_a_piece_to_blank_pos(ele, last_click)
                                 move_piece(turn, last_click, playerB, playerW, ele, false)
                                 if(turn === "W") turn = "B"
                                 else turn = "W"
+                                last_click = null
                             }
                         }
                     }else{
@@ -656,6 +670,7 @@ const makeAmove = (ele) => {
                         move_piece(turn, last_click, playerB, playerW, ele, false)
                         if(turn === "W") turn = "B"
                         else turn = "W"
+                        last_click = null
                     }
                 }
                 }
@@ -687,6 +702,7 @@ const makeAmove = (ele) => {
                                         move_piece(turn, last, playerB, playerW, ele, true)
                                         if(turn === "W") turn = "B"
                                         else turn = "W"
+                                        last_click = null
                                     }
                                     if(asked_piece === "r" || asked_piece === "R"){
                                         var last = {pos: last_click.pos, piece: "rook"+turn}
@@ -695,6 +711,7 @@ const makeAmove = (ele) => {
                                         move_piece(turn, last, playerB, playerW, ele, true)
                                         if(turn === "W") turn = "B"
                                         else turn = "W"
+                                        last_click = null
                                     }
                                     if(asked_piece === "k" || asked_piece === "K"){
                                         var last = {pos: last_click.pos, piece: "knight"+turn}
@@ -703,6 +720,7 @@ const makeAmove = (ele) => {
                                         move_piece(turn, last, playerB, playerW, ele, true)
                                         if(turn === "W") turn = "B"
                                         else turn = "W"
+                                        last_click = null
                                     }
                                     if(asked_piece === "b" || asked_piece === "B"){
                                         var last = {pos: last_click.pos, piece: "bishop"+turn}
@@ -711,6 +729,7 @@ const makeAmove = (ele) => {
                                         move_piece(turn, last, playerB, playerW, ele, true)
                                         if(turn === "W") turn = "B"
                                         else turn = "W"
+                                        last_click = null
                                     }
                                 }else{
                                     add_to_score_list(get_the_piece(ele), turn)
@@ -718,6 +737,7 @@ const makeAmove = (ele) => {
                                     move_piece(turn, last_click, playerB, playerW, ele, true)
                                     if(turn === "W") turn = "B"
                                     else turn = "W"
+                                    last_click = null
                                 }
                             } 
                         }                     
@@ -730,6 +750,7 @@ const makeAmove = (ele) => {
                             move_piece(turn, last_click, playerB, playerW, ele, true)
                             if(turn === "W") turn = "B"
                             else turn = "W"
+                            last_click = null
                         }
                     }
                 }
