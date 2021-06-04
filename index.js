@@ -410,15 +410,15 @@ const check_road = (player1, player2, from, to) => {
     
 }
 
-const check_road_prime = (player1, player2, from, to) => {
+/*const check_road_prime = (player1, player2, from, to, piece) => {
     var road = []
     if(from[0] === to[0]) road = getBetween(from, to, "number")
     else if(from[1] === to[1]) road = getBetween(from, to, "letter")
     else road = getBetween(from, to, "otherwise")
-    if(road.length === 0) return null
+    if(road.length === 0 && piece.substring(0, piece.length - 1) !== "knight") return null
     return (Object.keys(player1)?.some(x => road.some(y => y === x)) || Object.keys(player2)?.some(x => road.some(y => y === x)))
     
-}
+}*/
 
 const move_a_piece_to_full_pos = (from, to) => {
     var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
@@ -463,19 +463,100 @@ const get_king_pos = (ele) => {
     return pos
 }
 
-const checkWin__blank = (me, opponent) => {
-    for(let i = 0; i < Object.keys(opponent).length; i++){
-        var piece = opponent[Object.keys(opponent)[i]]
-        var pos = Object.keys(opponent)[i]
+const check_win = (in_danger, offeser) => {
+    for(let i = 0; i < Object.keys(in_danger).length; i++){
+        var pos = Object.keys(in_danger)[i]
+        var piece = in_danger[Object.keys(in_danger)[i]]
         var poss = all_poss(piece, pos)
-        console.log(pos, poss,  poss[0], check_road_prime(me, opponent, pos, poss[0]))
-        /*for(let j = 0; j < poss.length; j++){
-            if(can_it({piece: piece, pos: pos}, poss[j], opponent, me)){
-
+        for(let j = 0; j <poss.length; j++){
+            if(Object.keys(offeser).some(x => x === poss[j])){
+                if(can_it__full({piece: piece, pos: pos}, poss[j], in_danger, offeser)) {
+                    if(check_road(in_danger, offeser, pos, poss[j], piece) === false) {
+                        if(piece.substring(0, piece?.length - 1) !== "pawn") return false
+                        else{
+                            if(poss[j][0] !== pos[0] && poss[j][1] !== pos[1]) {
+                                return false
+                            }
+                        }
+                    }
+                    
+                }
             }
-        }*/
+            if(!Object.keys(offeser).some(x => x === poss[j]) && !Object.keys(in_danger).some(x => x === poss[j])){
+                if(can_it({piece: piece, pos: pos}, poss[j], in_danger, offeser)) {
+                    if(check_road(in_danger, offeser, pos, poss[j], piece) === false) {
+                        if(piece.substring(0, piece?.length - 1) !== "pawn") return false
+                        else{
+                            if(poss[j][0] === pos[0]) {
+                                return false
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
     }
-    return false
+    return true
+}
+
+const win_Detected = (winner) => {
+    if(winner === "W"){
+        alert('The whites Won')
+    }else{
+        alert('The Blacks Won')
+    }
+    playerB = {
+        "8a" : "rookB",
+        "8b" : "knightB",
+        "8c": "bishopB",
+        "8d": "queenB",
+        "8e": "kingB",
+        "8f": "bishopB",
+        "8g": "knightB",
+        "8h": "rookB",
+        "7a": "pawnB",
+        "7b": "pawnB",
+        "7c": "pawnB",
+        "7d": "pawnB",
+        "7e": "pawnB",
+        "7f": "pawnB",
+        "7g": "pawnB",
+        "7h": "pawnB",
+    }
+    playerW = {
+        "1a" : "rookW",
+        "1b" : "knightW",
+        "1c": "bishopW",
+        "1d": "queenW",
+        "1e": "kingW",
+        "1f": "bishopW",
+        "1g": "knightW",
+        "1h": "rookW",
+        "2a": "pawnW",
+        "2b": "pawnW",
+        "2c": "pawnW",
+        "2d": "pawnW",
+        "2e": "pawnW",
+        "2f": "pawnW",
+        "2g": "pawnW",
+        "2h": "pawnW",
+    }
+    start_game = false
+    turn = null
+    last_click = null
+    var eles = document.querySelectorAll('.col')
+    eles.forEach(ele => {
+        ele.innerHTML = ""
+        ele.classList.remove('king_in_danger', "selected")
+    }) 
+    var score_B = document.getElementById('score_B')
+    score_B.innerHTML = ""
+    var score_W = document.getElementById('score_W')
+    score_W.innerHTML = ""
+    var eles_1 = document.querySelectorAll('.tt')
+    eles_1.forEach(ele => ele.innerHTML = "")
+    setPlayers()
 }
 
 const makeAmove = (ele) => {
@@ -514,10 +595,14 @@ const makeAmove = (ele) => {
                                 // check if the opponent's king in danger
                                 if(is_king_in_danger(playerB, playerW)){
                                     in_danger(playerB)
+                                    console.log("did u win W??", check_win(playerB, playerW))
+                                    if(check_win(playerB, playerW)){
+                                        win_Detected('W')
+                                    }
                                 }else{
                                     remove_danger()
                                 }
-                                console.log(checkWin__blank(playerW, playerB))
+                                
                             }
                             else {
                                 delete playerB[`${last_click.pos}`]
@@ -526,10 +611,14 @@ const makeAmove = (ele) => {
                                 // check if the opponent's king in danger
                                 if(is_king_in_danger(playerW, playerB)){
                                     in_danger(playerW)
+                                    console.log("did u win B??", check_win(playerW, playerB))
+                                    if(check_win(playerW, playerB)){
+                                        win_Detected('B')
+                                    }
                                 }else{
                                     remove_danger()
                                 }
-                                console.log(checkWin__blank(playerB, playerW))
+                                
                             }
                             set_You_Are_Playing(turn)
                             last_click = null
@@ -542,26 +631,31 @@ const makeAmove = (ele) => {
                             delete playerW[`${last_click.pos}`]
                             playerW[`${get_the_position(ele)}`] = last_click.piece
                             turn = "B"
-                                // check if the opponent's king in danger
-                                if(is_king_in_danger(playerB, playerW)){
+                            // check if the opponent's king in danger
+                            if(is_king_in_danger(playerB, playerW)){
                                 in_danger(playerB)
+                                console.log("did u win W??", check_win(playerB, playerW))
+                                if(check_win(playerB, playerW)){
+                                    win_Detected('W')
+                                }
                             }else{
                                 remove_danger()
                             }
-                            console.log(checkWin__blank(playerW, playerB))
-
                         }
                         else {
                             delete playerB[`${last_click.pos}`]
                             playerB[`${get_the_position(ele)}`] = last_click.piece
                             turn = "W"
-                                // check if the opponent's king in danger
-                                if(is_king_in_danger(playerW, playerB)){
+                            // check if the opponent's king in danger
+                            if(is_king_in_danger(playerW, playerB)){
                                 in_danger(playerW)
+                                console.log("did u win B??", check_win(playerW, playerB))
+                                if(check_win(playerW, playerB)){
+                                    win_Detected('B')
+                                }
                             }else{
                                 remove_danger()
                             }
-                            console.log(checkWin__blank(playerW, playerB))
                         }
                         set_You_Are_Playing(turn)
                         last_click = null
@@ -602,6 +696,10 @@ const makeAmove = (ele) => {
                                     turn = "B"
                                     if(is_king_in_danger(playerB, playerW)){
                                         in_danger(playerB)
+                                        console.log("did u win W??", check_win(playerB, playerW))
+                                        if(check_win(playerB, playerW)){
+                                            win_Detected('W')
+                                        }
                                     }else{
                                         remove_danger()
                                     }
@@ -613,6 +711,10 @@ const makeAmove = (ele) => {
                                     turn = "W"
                                     if(is_king_in_danger(playerW, playerB)){
                                         in_danger(playerW)
+                                        console.log("did u win B??", check_win(playerW, playerB))
+                                        if(check_win(playerW, playerB)){
+                                            win_Detected('B')
+                                        }
                                     }else{
                                         remove_danger()
                                     }
@@ -642,6 +744,10 @@ const makeAmove = (ele) => {
                                 turn = "B"
                                 if(is_king_in_danger(playerB, playerW)){
                                     in_danger(playerB)
+                                    console.log("did u win W??", check_win(playerB, playerW))
+                                    if(check_win(playerB, playerW)){
+                                        win_Detected('W')
+                                    }
                                 }else{
                                     remove_danger()
                                 }
@@ -653,6 +759,10 @@ const makeAmove = (ele) => {
                                 turn = "W"
                                 if(is_king_in_danger(playerW, playerB)){
                                     in_danger(playerW)
+                                    console.log("did u win B??", check_win(playerW, playerB))
+                                    if(check_win(playerW, playerB)){
+                                        win_Detected('B')
+                                    }
                                 }else{
                                     remove_danger()
                                 }
