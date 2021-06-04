@@ -36,28 +36,24 @@ var playerW = {
 }
 var start_game = false
 var turn = null
+var last_click = null
 
 const set_You_Are_Playing = (who) => {
-    if(who === "B"){
-        var ele1 = document.getElementById('W')
-        if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
-    }else{
-        var ele1 = document.getElementById('B')
-        if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
+    if(who !== null){
+        if(who === "B"){
+            var ele1 = document.getElementById('W')
+            if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
+        }else{
+            var ele1 = document.getElementById('B')
+            if(ele1.childNodes.length > 1) ele1.removeChild(ele1.childNodes[1])
+        }
+        let ele = document.getElementById(who)
+        var chi = document.createElement('p')
+        chi.innerText = "Your Turn - - -"
+        chi.classList.add('you_R_playing')
+        ele.appendChild(chi)
     }
-    let ele = document.getElementById(who)
-    var chi = document.createElement('p')
-    chi.innerText = "Your Turn - - -"
-    chi.classList.add('you_R_playing')
-    ele.appendChild(chi)
 }
-
-/*const blackPlayed = (who) => {
-    if(turn !== who){
-        turn = who
-        set_You_Are_Playing(turn)
-    }
-}*/
 
 const startGame = () => {
     if(start_game === false) {
@@ -104,10 +100,6 @@ function get_the_position (ele) {
     // get the position of the ele
     return ele?.getAttribute('data-cl')
 }
-
-// var first_click = false
-// var second_click = false
-var last_click = null
 
 function move_a_piece_to_blank_pos (where, from) {
     var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
@@ -380,9 +372,7 @@ const can_it__full = (from, to, me, opponent) => {
 
     return false
 }
-/*
-console.log(is_king_in_danger({"2a": "pawnW", "5e": "kingW"}, {"4f": "pawnB", "8e": "kingB", "3h": "queenB"}))
-*/
+
 
 const selected = (where) => {
     if(where !== null){
@@ -394,12 +384,7 @@ const selected = (where) => {
     }
 }
 
-/*const select__Poss = (eles, piece) => {
-    eles.forEach(ele => document.querySelector(`[data-cl = "${ele}"]`).classList.add('poss'))
-}
-const unselect__pos =  () => {
-    document.querySelectorAll('.col').forEach(ele => ele.classList.remove('poss'))
-}*/
+
 
 const check_road = (player1, player2, from, to) => {
     var road = []
@@ -410,15 +395,6 @@ const check_road = (player1, player2, from, to) => {
     
 }
 
-/*const check_road_prime = (player1, player2, from, to, piece) => {
-    var road = []
-    if(from[0] === to[0]) road = getBetween(from, to, "number")
-    else if(from[1] === to[1]) road = getBetween(from, to, "letter")
-    else road = getBetween(from, to, "otherwise")
-    if(road.length === 0 && piece.substring(0, piece.length - 1) !== "knight") return null
-    return (Object.keys(player1)?.some(x => road.some(y => y === x)) || Object.keys(player2)?.some(x => road.some(y => y === x)))
-    
-}*/
 
 const move_a_piece_to_full_pos = (from, to) => {
     var rm_ele = document.querySelector(`[data-cl = "${from.pos}"]`)
@@ -463,15 +439,15 @@ const get_king_pos = (ele) => {
     return pos
 }
 
-const check_win = (in_danger, offeser) => {
+const check_win = (in_danger, offenser) => {
     for(let i = 0; i < Object.keys(in_danger).length; i++){
         var pos = Object.keys(in_danger)[i]
         var piece = in_danger[Object.keys(in_danger)[i]]
         var poss = all_poss(piece, pos)
         for(let j = 0; j <poss.length; j++){
-            if(Object.keys(offeser).some(x => x === poss[j])){
-                if(can_it__full({piece: piece, pos: pos}, poss[j], in_danger, offeser)) {
-                    if(check_road(in_danger, offeser, pos, poss[j], piece) === false) {
+            if(Object.keys(offenser).some(x => x === poss[j])){
+                if(can_it__full({piece: piece, pos: pos}, poss[j], in_danger, offenser)) {
+                    if(check_road(in_danger, offenser, pos, poss[j], piece) === false) {
                         if(piece.substring(0, piece?.length - 1) !== "pawn") return false
                         else{
                             if(poss[j][0] !== pos[0] && poss[j][1] !== pos[1]) {
@@ -482,12 +458,12 @@ const check_win = (in_danger, offeser) => {
                     
                 }
             }
-            if(!Object.keys(offeser).some(x => x === poss[j]) && !Object.keys(in_danger).some(x => x === poss[j])){
-                if(can_it({piece: piece, pos: pos}, poss[j], in_danger, offeser)) {
-                    if(check_road(in_danger, offeser, pos, poss[j], piece) === false) {
+            if(!Object.keys(offenser).some(x => x === poss[j]) && !Object.keys(in_danger).some(x => x === poss[j])){
+                if(can_it({piece: piece, pos: pos}, poss[j], in_danger, offenser)) {
+                    if(check_road(in_danger, offenser, pos, poss[j], piece) === false) {
                         if(piece.substring(0, piece?.length - 1) !== "pawn") return false
                         else{
-                            if(poss[j][0] === pos[0]) {
+                            if(poss[j][1] === pos[1]) {
                                 return false
                             }
                         }
@@ -559,6 +535,61 @@ const win_Detected = (winner) => {
     setPlayers()
 }
 
+const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
+    if(turn === "W") {
+        delete playerW[`${last_click.pos}`]
+        playerW[`${get_the_position(ele)}`] = last_click.piece
+        if(full) delete playerB[`${get_the_position(ele)}`]
+        turn = "B"
+        // check if the opponent's king in danger
+        if(is_king_in_danger(playerB, playerW)){
+            in_danger(playerB)
+            console.log("did u win W??", check_win(playerB, playerW))
+            if(check_win(playerB, playerW)){
+                win_Detected('W')
+            }
+        }else{
+            remove_danger()
+        }
+        
+    }
+    else {
+        delete playerB[`${last_click.pos}`]
+        playerB[`${get_the_position(ele)}`] = last_click.piece
+        if(full) delete playerW[`${get_the_position(ele)}`]
+        turn = "W"
+        // check if the opponent's king in danger
+        if(is_king_in_danger(playerW, playerB)){
+            in_danger(playerW)
+            console.log("did u win B??", check_win(playerW, playerB))
+            if(check_win(playerW, playerB)){
+                win_Detected('B')
+            }
+        }else{
+            remove_danger()
+        }
+        
+    }
+    console.log(playerW, playerB)
+    set_You_Are_Playing(turn)
+    last_click = null
+    selected(null)
+}
+
+const newPlayers = (playerW, playerB, turn) => {
+    var me = null
+    var opponent = null
+    if(turn === "W"){
+        me = Object.assign({}, playerW)
+        opponent = Object.assign({}, playerB)
+    }else{
+        me = Object.assign({}, playerB)
+        opponent = Object.assign({}, playerW)
+    }
+    return [me, opponent]
+}
+
+
 const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
     if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
@@ -575,92 +606,56 @@ const makeAmove = (ele) => {
             if(ele?.childNodes?.length === 0){
                 if(!check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
                     // Need to check if the piece can make the move and the king isn't in danger
-                var me = null
-                var opponent = null
-                if(turn === "W"){
-                    me = Object.assign({}, playerW)
-                    opponent = Object.assign({}, playerB)
-                }else{
-                    me = Object.assign({}, playerB)
-                    opponent = Object.assign({}, playerW)
-                }
+                var me = newPlayers(playerW, playerB, turn)[0]
+                var opponent = newPlayers(playerW, playerB, turn)[1]
                 if(can_it(last_click, get_the_position(ele), me, opponent)){
                     if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "pawn"){//check if the piece that's being moved is a pawn to prevent to move aside
-                        if(all_poss(last_click.piece, last_click.pos).filter(x => x[1] === last_click.pos[1]).some(x => x === get_the_position(ele))){
-                            move_a_piece_to_blank_pos(ele, last_click)
-                            if(turn === "W") {
-                                delete playerW[`${last_click.pos}`]
-                                playerW[`${get_the_position(ele)}`] = last_click.piece
-                                turn = "B"
-                                // check if the opponent's king in danger
-                                if(is_king_in_danger(playerB, playerW)){
-                                    in_danger(playerB)
-                                    console.log("did u win W??", check_win(playerB, playerW))
-                                    if(check_win(playerB, playerW)){
-                                        win_Detected('W')
-                                    }
-                                }else{
-                                    remove_danger()
+                        if(all_poss(last_click.piece, last_click.pos).filter(x => x[1] === last_click.pos[1]).some(x => x === get_the_position(ele))){//check if the pawn can make the move
+                            if(get_the_position(ele)[0] === "1" || get_the_position(ele)[0] === "8"){// need to check if the pawn reaches the other part
+                                var asked_piece = null
+                                while(asked_piece !== "q" && asked_piece !== "Q" && asked_piece !== "r" && asked_piece !== "R" && asked_piece !== "k" && asked_piece !== "K" && asked_piece !== "b" && asked_piece !== "B"){
+                                    asked_piece = prompt('which piece do you need\nFor queen type: "q" or "Q"\nFor rook type: "r" or "R"\nFor Knight type: "k" or "K"\nFor bishop type: "b" or "B"')
                                 }
-                                
-                            }
-                            else {
-                                delete playerB[`${last_click.pos}`]
-                                playerB[`${get_the_position(ele)}`] = last_click.piece
-                                turn = "W"
-                                // check if the opponent's king in danger
-                                if(is_king_in_danger(playerW, playerB)){
-                                    in_danger(playerW)
-                                    console.log("did u win B??", check_win(playerW, playerB))
-                                    if(check_win(playerW, playerB)){
-                                        win_Detected('B')
-                                    }
-                                }else{
-                                    remove_danger()
+                                if(asked_piece === "q" || asked_piece === "Q"){
+                                    var last = {pos: last_click.pos, piece: "queen"+turn}
+                                    move_a_piece_to_blank_pos(ele, last)
+                                    move_piece(turn, last, playerB, playerW, ele, false)
+                                    if(turn === "W") turn = "B"
+                                    else turn = "W"
                                 }
-                                
+                                if(asked_piece === "r" || asked_piece === "R"){
+                                    var last = {pos: last_click.pos, piece: "rook"+turn}
+                                    move_a_piece_to_blank_pos(ele, last)
+                                    move_piece(turn, last, playerB, playerW, ele, false)
+                                    if(turn === "W") turn = "B"
+                                    else turn = "W"
+                                }
+                                if(asked_piece === "k" || asked_piece === "K"){
+                                    var last = {pos: last_click.pos, piece: "knight"+turn}
+                                    move_a_piece_to_blank_pos(ele, last)
+                                    move_piece(turn, last, playerB, playerW, ele, false)
+                                    if(turn === "W") turn = "B"
+                                    else turn = "W"
+                                }
+                                if(asked_piece === "b" || asked_piece === "B"){
+                                    var last = {pos: last_click.pos, piece: "bishop"+turn}
+                                    move_a_piece_to_blank_pos(ele, last)
+                                    move_piece(turn, last, playerB, playerW, ele, false)
+                                    if(turn === "W") turn = "B"
+                                    else turn = "W"
+                                }
+                            }else{
+                                move_a_piece_to_blank_pos(ele, last_click)
+                                move_piece(turn, last_click, playerB, playerW, ele, false)
+                                if(turn === "W") turn = "B"
+                                else turn = "W"
                             }
-                            set_You_Are_Playing(turn)
-                            last_click = null
-                            selected(null)
-                            // unselect__pos()
                         }
                     }else{
                         move_a_piece_to_blank_pos(ele, last_click)
-                        if(turn === "W") {
-                            delete playerW[`${last_click.pos}`]
-                            playerW[`${get_the_position(ele)}`] = last_click.piece
-                            turn = "B"
-                            // check if the opponent's king in danger
-                            if(is_king_in_danger(playerB, playerW)){
-                                in_danger(playerB)
-                                console.log("did u win W??", check_win(playerB, playerW))
-                                if(check_win(playerB, playerW)){
-                                    win_Detected('W')
-                                }
-                            }else{
-                                remove_danger()
-                            }
-                        }
-                        else {
-                            delete playerB[`${last_click.pos}`]
-                            playerB[`${get_the_position(ele)}`] = last_click.piece
-                            turn = "W"
-                            // check if the opponent's king in danger
-                            if(is_king_in_danger(playerW, playerB)){
-                                in_danger(playerW)
-                                console.log("did u win B??", check_win(playerW, playerB))
-                                if(check_win(playerW, playerB)){
-                                    win_Detected('B')
-                                }
-                            }else{
-                                remove_danger()
-                            }
-                        }
-                        set_You_Are_Playing(turn)
-                        last_click = null
-                        selected(null)
-                        // unselect__pos()
+                        move_piece(turn, last_click, playerB, playerW, ele, false)
+                        if(turn === "W") turn = "B"
+                        else turn = "W"
                     }
                 }
                 }
@@ -677,99 +672,64 @@ const makeAmove = (ele) => {
                 if(!check_road(playerW, playerB, last_click.pos, get_the_position(ele))){
                     if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "pawn"){ // check if the piece is a pawn (because the pawn can't take a piece if it's in front of him)
                         if(all_poss(last_click?.piece, last_click.pos).filter(x => x[1] !== last_click?.pos[1]).some(x => x == get_the_position(ele))){
-                            var me = null
-                            var opponent = null
-                            if(turn === "W"){
-                                me = Object.assign({}, playerW)
-                                opponent = Object.assign({}, playerB)
-                            }else{
-                                me = Object.assign({}, playerB)
-                                opponent = Object.assign({}, playerW)
-                            }
+                            var me = newPlayers(playerW, playerB, turn)[0]
+                            var opponent = newPlayers(playerW, playerB, turn)[1]
                             if(can_it__full(last_click, get_the_position(ele), me, opponent)){
-                                add_to_score_list(get_the_piece(ele), turn)
-                                move_a_piece_to_full_pos(last_click, get_the_position(ele))
-                                if(turn === "W") {
-                                    delete playerW[`${last_click.pos}`]
-                                    playerW[`${get_the_position(ele)}`] = last_click.piece
-                                    delete playerB[`${get_the_position(ele)}`]
-                                    turn = "B"
-                                    if(is_king_in_danger(playerB, playerW)){
-                                        in_danger(playerB)
-                                        console.log("did u win W??", check_win(playerB, playerW))
-                                        if(check_win(playerB, playerW)){
-                                            win_Detected('W')
-                                        }
-                                    }else{
-                                        remove_danger()
+                                if(get_the_position(ele)[0] === "1" || get_the_position(ele)[0] === "8"){// need to check if the pawn reaches the other part
+                                    var asked_piece = null
+                                    while(asked_piece !== "q" && asked_piece !== "Q" && asked_piece !== "r" && asked_piece !== "R" && asked_piece !== "k" && asked_piece !== "K" && asked_piece !== "b" && asked_piece !== "B"){
+                                        asked_piece = prompt('which piece do you need\nFor queen type: "q" or "Q"\nFor rook type: "r" or "R"\nFor Knight type: "k" or "K"\nFor bishop type: "b" or "B"')
                                     }
-                                }
-                                else {
-                                    delete playerB[`${last_click.pos}`]
-                                    playerB[`${get_the_position(ele)}`] = last_click.piece
-                                    delete playerW[`${get_the_position(ele)}`]
-                                    turn = "W"
-                                    if(is_king_in_danger(playerW, playerB)){
-                                        in_danger(playerW)
-                                        console.log("did u win B??", check_win(playerW, playerB))
-                                        if(check_win(playerW, playerB)){
-                                            win_Detected('B')
-                                        }
-                                    }else{
-                                        remove_danger()
+                                    if(asked_piece === "q" || asked_piece === "Q"){
+                                        var last = {pos: last_click.pos, piece: "queen"+turn}
+                                        add_to_score_list(get_the_piece(ele), turn)
+                                        move_a_piece_to_full_pos(last, get_the_position(ele))
+                                        move_piece(turn, last, playerB, playerW, ele, true)
+                                        if(turn === "W") turn = "B"
+                                        else turn = "W"
                                     }
+                                    if(asked_piece === "r" || asked_piece === "R"){
+                                        var last = {pos: last_click.pos, piece: "rook"+turn}
+                                        add_to_score_list(get_the_piece(ele), turn)
+                                        move_a_piece_to_full_pos(last, get_the_position(ele))
+                                        move_piece(turn, last, playerB, playerW, ele, true)
+                                        if(turn === "W") turn = "B"
+                                        else turn = "W"
+                                    }
+                                    if(asked_piece === "k" || asked_piece === "K"){
+                                        var last = {pos: last_click.pos, piece: "knight"+turn}
+                                        add_to_score_list(get_the_piece(ele), turn)
+                                        move_a_piece_to_full_pos(last, get_the_position(ele))
+                                        move_piece(turn, last, playerB, playerW, ele, true)
+                                        if(turn === "W") turn = "B"
+                                        else turn = "W"
+                                    }
+                                    if(asked_piece === "b" || asked_piece === "B"){
+                                        var last = {pos: last_click.pos, piece: "bishop"+turn}
+                                        add_to_score_list(get_the_piece(ele), turn)
+                                        move_a_piece_to_full_pos(last, get_the_position(ele))
+                                        move_piece(turn, last, playerB, playerW, ele, true)
+                                        if(turn === "W") turn = "B"
+                                        else turn = "W"
+                                    }
+                                }else{
+                                    add_to_score_list(get_the_piece(ele), turn)
+                                    move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                                    move_piece(turn, last_click, playerB, playerW, ele, true)
+                                    if(turn === "W") turn = "B"
+                                    else turn = "W"
                                 }
-                                set_You_Are_Playing(turn)
-                                last_click = null
-                                selected(null)
                             } 
                         }                     
                     }else{
-                        var me = null
-                        var opponent = null
-                        if(turn === "W"){
-                            me = Object.assign({}, playerW)
-                            opponent = Object.assign({}, playerB)
-                        }else{
-                            me = Object.assign({}, playerB)
-                            opponent = Object.assign({}, playerW)
-                        }
+                        var me = newPlayers(playerW, playerB, turn)[0]
+                        var opponent = newPlayers(playerW, playerB, turn)[1]
                         if(can_it__full(last_click, get_the_position(ele), me, opponent)){
                             add_to_score_list(get_the_piece(ele), turn)
                             move_a_piece_to_full_pos(last_click, get_the_position(ele))
-                            if(turn === "W") {
-                                delete playerW[`${last_click.pos}`]
-                                playerW[`${get_the_position(ele)}`] = last_click.piece
-                                delete playerB[`${get_the_position(ele)}`]
-                                turn = "B"
-                                if(is_king_in_danger(playerB, playerW)){
-                                    in_danger(playerB)
-                                    console.log("did u win W??", check_win(playerB, playerW))
-                                    if(check_win(playerB, playerW)){
-                                        win_Detected('W')
-                                    }
-                                }else{
-                                    remove_danger()
-                                }
-                            }
-                            else {
-                                delete playerB[`${last_click.pos}`]
-                                playerB[`${get_the_position(ele)}`] = last_click.piece
-                                delete playerW[`${get_the_position(ele)}`]
-                                turn = "W"
-                                if(is_king_in_danger(playerW, playerB)){
-                                    in_danger(playerW)
-                                    console.log("did u win B??", check_win(playerW, playerB))
-                                    if(check_win(playerW, playerB)){
-                                        win_Detected('B')
-                                    }
-                                }else{
-                                    remove_danger()
-                                }
-                            }
-                            set_You_Are_Playing(turn)
-                            last_click = null
-                            selected(null)
+                            move_piece(turn, last_click, playerB, playerW, ele, true)
+                            if(turn === "W") turn = "B"
+                            else turn = "W"
                         }
                     }
                 }
