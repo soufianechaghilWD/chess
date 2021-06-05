@@ -1,5 +1,5 @@
 body{
-    background: gray;
+    background: #B6B6B6;
     height: 100vh;
     width: 95vw;
 }
@@ -36,8 +36,24 @@ body > button{
 }
 body > h1{
     text-align: center;
-    margin-top: 1rem;
+    margin: 1rem 0;
+    font-size: 48px;
+    font-family: "Righteous", sans-serif;
 }
+body > button{
+    background: #00D8CB;
+    border-radius: 5px;
+    color: white;
+    width: 176px;
+    height: 54px;
+    border: none;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 23px;
+    cursor: pointer;
+} 
 .row{
     height: calc(600px / 8);
     width: 600px;
@@ -52,7 +68,7 @@ body > h1{
 .col{
     height: calc(600px / 8);
     width: calc(600px / 8);
-    border: 1px solid rgba(0, 0, 0, 0.7);
+    /* border: 1px solid rgba(0, 0, 0, 0.7); */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -76,19 +92,21 @@ body > h1{
     font-size: 1.5rem;
 }
 .black{
-    background: rgb(10, 165, 10);
+    background: #73DE41;
 }
 .white{
     background: white;
 }
 .you_R_playing{
-    font-weight: 700;
     text-align: center;
-    font-size: 17px;
     color: white;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 25px;
+    line-height: 29px;
 }
 .selected{
-    background: red;
+    background: #F0E052;
 }
 .poss{
     background: greenyellow;
@@ -97,5 +115,5 @@ body > h1{
     height: 100px;
 }
 .king_in_danger{
-    background: blue;
+    background: #AA0101;
 }
