@@ -545,7 +545,7 @@ const win_Detected = (winner) => {
     setPlayers()
 }
 
-const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
+const move_piece = (turn, last_click, playerB, playerW, ele, full, castling) => {
     if(turn === "W") {
         delete playerW[`${last_click.pos}`]
         playerW[`${get_the_position(ele)}`] = last_click.piece
@@ -578,7 +578,7 @@ const move_piece = (turn, last_click, playerB, playerW, ele, full) => {
         }
         
     }
-    set_You_Are_Playing(turn)
+    if(!castling) set_You_Are_Playing(turn)
     selected(null)
 }
 
@@ -600,9 +600,7 @@ const makeAmove = (ele) => {
     // check if the game is on and if the user's turn and if position is the users's
     // if((turn === get_the_user_from_the_ele(ele) || last_click !== null) && start_game){
         if((turn === get_the_user_from_the_ele(ele) || last_click !== null ) && start_game){
-            console.log("just clicked", last_click, turn, get_the_user_from_the_ele(ele))
             // check if its the first click or not
-        console.log("inside")
         if(last_click === null){
             last_click = {
                 "pos" : get_the_position(ele),
@@ -665,6 +663,39 @@ const makeAmove = (ele) => {
                                 last_click = null
                             }
                         }
+                    }else if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "king"){// check the piece is the king
+                        if(letter_up(last_click.pos[1], -2) === get_the_position(ele)[1]){//in case the player is trying to castle
+                            var leftRook_pos = last_click.pos[0]+ letter_up(last_click.pos[1], -4)
+                            if(!check_road(playerB, playerW, last_click.pos, leftRook_pos) && !is_king_in_danger(playerB, playerW) && !is_king_in_danger(playerW, playerB)){
+                                var leftRook = document.querySelector(`[data-cl = "${leftRook_pos}"]`)
+                                var leftrooktoPos = leftRook_pos[0]+letter_up(leftRook_pos[1], 3)
+                                var leftrookto = document.querySelector(`[data-cl = "${leftrooktoPos}"]`)
+                                move_a_piece_to_blank_pos(ele, last_click)
+                                move_piece(turn, last_click, playerB, playerW, ele, false, true)
+                                move_a_piece_to_blank_pos(leftrookto, {pos: leftRook_pos, piece: get_the_piece(leftRook)})
+                                var piece = "rook"+turn
+                                move_piece(turn, {pos: leftRook_pos, piece: piece}, playerB, playerW, leftrookto, false)
+                                king_moved[`${turn}`] = true
+                                rookLeft[`${turn}`] = true
+                                if(turn === "W") turn = "B"
+                                else turn = "W"
+                                last_click = null
+                            }
+                        }else{// in case the king is making a normal move
+                            move_a_piece_to_blank_pos(ele, last_click)
+                            move_piece(turn, last_click, playerB, playerW, ele, false)
+                            if(king_moved[`${turn}`] === false) king_moved[`${turn}`] = true
+                            if(turn === "W") turn = "B"
+                            else turn = "W"
+                            last_click = null
+                        }
+                    }else if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "rook"){
+                        move_a_piece_to_blank_pos(ele, last_click)
+                        move_piece(turn, last_click, playerB, playerW, ele, false)
+                        if(last_click.pos[1] === "a" && rookLeft[`${turn}`] === false) rookLeft[`${turn}`] = true
+                        if(turn === "W") turn = "B"
+                        else turn = "W"
+                        last_click = null
                     }else{
                         move_a_piece_to_blank_pos(ele, last_click)
                         move_piece(turn, last_click, playerB, playerW, ele, false)
@@ -741,6 +772,30 @@ const makeAmove = (ele) => {
                                 }
                             } 
                         }                     
+                    }else if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "rook"){
+                        var me = newPlayers(playerW, playerB, turn)[0]
+                        var opponent = newPlayers(playerW, playerB, turn)[1]
+                        if(can_it__full(last_click, get_the_position(ele), me, opponent)){
+                            add_to_score_list(get_the_piece(ele), turn)
+                            move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                            move_piece(turn, last_click, playerB, playerW, ele, true)
+                            if(last_click.pos[1] === "a" && rookLeft[`${turn}`] === false) rookLeft[`${turn}`] = true
+                            if(turn === "W") turn = "B"
+                            else turn = "W"
+                            last_click = null
+                        }
+                    }else if(last_click?.piece?.substring(0, last_click?.piece?.length - 1) === "king"){
+                        var me = newPlayers(playerW, playerB, turn)[0]
+                        var opponent = newPlayers(playerW, playerB, turn)[1]
+                        if(can_it__full(last_click, get_the_position(ele), me, opponent)){
+                            add_to_score_list(get_the_piece(ele), turn)
+                            move_a_piece_to_full_pos(last_click, get_the_position(ele))
+                            move_piece(turn, last_click, playerB, playerW, ele, true)
+                            if(last_click.pos[1] === "a" && king_moved[`${turn}`] === false) king_moved[`${turn}`] = true
+                            if(turn === "W") turn = "B"
+                            else turn = "W"
+                            last_click = null
+                        }
                     }else{
                         var me = newPlayers(playerW, playerB, turn)[0]
                         var opponent = newPlayers(playerW, playerB, turn)[1]
